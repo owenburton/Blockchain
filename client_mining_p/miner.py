@@ -15,7 +15,7 @@ def proof_of_work(block):
     """
     block_string = json.dumps(block, sort_keys=True)
     proof = 0
-    while not valid_proof(block_string, proof):
+    while valid_proof(block_string, proof) is False:
         proof += 1
     return proof
 
@@ -32,7 +32,7 @@ def valid_proof(block_string, proof):
     """
     guess = f'{block_string}{proof}'.encode()
     guess_hash = hashlib.sha256(guess).hexdigest()
-    return guess_hash[:3] == '000'
+    return guess_hash[:3]=='000'
     # return guess_hash[:6] == '000000'
 
 
@@ -42,7 +42,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         node = sys.argv[1]
     else:
-        node = "http://localhost:5000"
+        # node = "http://localhost:5000"
+        node = "http://127.0.0.1:5000/"
 
     # Load ID
     f = open("my_id.txt", "r")

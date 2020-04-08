@@ -37,6 +37,7 @@ class Blockchain(object):
 
     @staticmethod
     def valid_proof(block_string, proof):
+        block_string = json.dumps(block_string, sort_keys=True)
         guess = f'{block_string}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:3] == '000'
@@ -52,7 +53,7 @@ node_identifier = str(uuid4()).replace('-', '')
 # Instantiate the Blockchain
 blockchain = Blockchain()
 
-@app.route('/last_block', methods=['POST'])
+@app.route('/last_block', methods=['GET'])
 def last_block():
     return jsonify(blockchain.last_block), 200
 
@@ -60,15 +61,15 @@ def last_block():
 @app.route('/mine', methods=['POST'])
 def mine():
     data = request.get_json()
-    proof, miner_id = data['proof'], data['id']
+    proof, miner_id = int(data['proof']), data['id']
     if not proof: return jsonify({'message': 'missing proof'}), 400
     if not miner_id: return jsonify({'message': 'missing id'}), 400
 
-    if blockckain.valid_proof(blockchain.last_block, proof):
+    if blockchain.valid_proof(blockchain.last_block, proof):
         prev_hash = blockchain.hash(blockchain.last_block)
         blockchain.new_block(proof, prev_hash)
         return jsonify({'message': 'new block forged'}), 200
-
+    
     return jsonify({'message': 'proof rejected'}), 200
 
 
