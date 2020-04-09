@@ -26,24 +26,28 @@ if __name__ == '__main__':
         node = sys.argv[1]
     else:
         # node = "http://localhost:5000"
-        node = "http://127.0.0.1:5000/"
+        # node = "http://127.0.0.1:5000/"
+        node = ""
 
-    f = open("my_id.txt", "r")
+    f = open("/content/Blockchain/client_mining_p/my_id.txt", "r")
     id = f.read()
     print("ID is", id)
     f.close()
 
     coins = 0
 
-    while True:
-        r = requests.get(url=node + "/last_block")
-        try:
-            data = r.json()
-        except ValueError:
+    def check_json(a_response):
+        try: 
+            return a_response.json()
+        except: ValueError:
             print("Error:  Non-json response")
             print("Response returned:")
             print(r)
             break
+
+    while True:
+        r = requests.get(url=node + "/last_block")
+        data = check_json(r)
 
         print('starting work..')
         start = time()
@@ -54,7 +58,7 @@ if __name__ == '__main__':
         post_data = {"proof": new_proof, "id": id}
 
         r = requests.post(url=node + "/mine", json=post_data)
-        data = r.json()
+        data = check_json(r)
 
         m = data['message']
         if m != 'new block forged':
