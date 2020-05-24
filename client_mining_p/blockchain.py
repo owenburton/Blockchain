@@ -60,10 +60,14 @@ def last_block():
 
 @app.route('/mine', methods=['POST'])
 def mine():
-    data = request.get_json()
-    proof, miner_id = int(data['proof']), data['id']
-    if not proof: return jsonify({'message': 'missing proof'}), 400
-    if not miner_id: return jsonify({'message': 'missing id'}), 400
+    r = request.get_json()
+    try: data = r.json()
+    except ValueError: return jsonify({'message': 'you sent non-json'}), 400
+
+    if 'proof' not in data or 'id' not in data:
+        return jsonify({'message': 'missing req info'}), 400
+    else: 
+        proof, miner_id = int(data['proof']), data['id']
 
     if blockchain.valid_proof(blockchain.last_block, proof):
         prev_hash = blockchain.hash(blockchain.last_block)
